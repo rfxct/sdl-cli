@@ -8,27 +8,29 @@ const TOKEN = Buffer.from([process.env.CLIENT_ID, process.env.CLIENT_SECRET].joi
 
 export default class Spotify {
   // static async retrieveLikedSongs(access_token: string) {
-  //   if (Date.now() - Number(config.get('generated')) > 3600 * 1000) {
-  //     console.log(await Spotify.refreshUserToken(config.get('refresh_token')))
-  //   }
-  //   const BASE_URL = 'https://api.spotify.com/v1/me/tracks'
-  //   const allTracks = []
-
-  //   const { data } = await axios.get(BASE_URL,
-  //     { headers: { 'Authorization': `Bearer ${access_token}` } }).catch(() => {
-  //       return console.log('You need authorize again your spotify account.')
-  //     })
+  //   const tracks = []
+  //   const { data } = await axios.get('https://api.spotify.com/v1/me/tracks', {
+  //     headers: { 'Authorization': `Bearer ${access_token}` }
+  //   })
 
   //   for (let i = 0; i <= Math.floor(data.total / 50); i++) {
-  //     const { data } = await axios.get(BASE_URL + `?offset=${i * 50}&limit=50`,
+  //     const { data } = await axios.get(`https://api.spotify.com/v1/me/tracks?offset=${i * 50}&limit=50`,
   //       { headers: { 'Authorization': `Bearer ${access_token}` } })
 
-  //     allTracks.push(...data.items)
+  //     tracks.push(...data.items.map(track => track))
   //   }
-  //   return allTracks
+  //   return tracks
   // }
 
-  public static async refreshToken(refresh_token: string): Promise<IRefreshResult> {
+  public static async getPlaylistSongs(access_token: string, playlist_id: string) {
+    const result = await axios.get(`https://api.spotify.com/v1/playlists/${playlist_id}`, {
+      headers: { 'Authorization': `Bearer ${access_token}` }
+    })
+
+    return result?.data || {}
+  }
+
+  public static async refreshUserToken(refresh_token: string): Promise<IRefreshResult> {
     const result = await axios.post('https://accounts.spotify.com/api/token',
       new URLSearchParams({ grant_type: 'refresh_token', refresh_token }), {
       headers: { 'Authorization': `Basic ${TOKEN}`, 'Content-Type': 'application/x-www-form-urlencoded' }
@@ -37,18 +39,19 @@ export default class Spotify {
     return result?.data || {}
   }
 
-  public static async getToken(): Promise<IAuthResult> {
+  public static async getUserToken(): Promise<IAuthResult> {
     return new Promise((resolve, reject) => {
       const server = fastify()
 
       server.get('/auth', async (req: FastifyRequest, reply: FastifyReply) => {
         const { code } = req.query as { code: string }
-        const data = await Spotify.retrieveUserToken(code)
+        const { data } = await axios.post('https://accounts.spotify.com/api/token',
+          new URLSearchParams({ grant_type: 'authorization_code', redirect_uri: (process.env.REDIRECT_URI as string), code }), {
+          headers: { 'Authorization': `Basic ${TOKEN}`, 'Content-Type': 'application/x-www-form-urlencoded' }
+        })
 
         const authenticated = !!data.access_token
-
-        if (authenticated) resolve(data)
-        else reject(data)
+        authenticated ? resolve(data) : reject(data)
 
         reply.send(authenticated ? 'Autenticado com sucesso' : 'Ocorreu um erro na autenticação')
         server.close()
@@ -56,14 +59,5 @@ export default class Spotify {
 
       server.listen(process.env.SERVER_PORT as string)
     })
-  }
-
-  private static async retrieveUserToken(code: string) {
-    const result = await axios.post('https://accounts.spotify.com/api/token',
-      new URLSearchParams({ grant_type: 'authorization_code', redirect_uri: (process.env.REDIRECT_URI as string), code }), {
-      headers: { 'Authorization': `Basic ${TOKEN}`, 'Content-Type': 'application/x-www-form-urlencoded' }
-    })
-
-    return result?.data || {}
   }
 }

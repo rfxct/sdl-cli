@@ -21,9 +21,9 @@ export default class Login extends Command {
       })
     ].join(''))
 
-    const result = await Spotify.getToken()
+    const result = await Spotify.getUserToken()
     Cache.persistAuth(result)
-    
+
     console.log('Autenticado com sucesso')
   }
 }
