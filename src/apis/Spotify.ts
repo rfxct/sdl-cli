@@ -2,7 +2,7 @@ import axios from 'axios'
 import cli from 'cli-ux'
 import fastify, { FastifyReply, FastifyRequest } from 'fastify'
 
-import AuthResult from '../interfaces/AuthResult'
+import IAuthResult from '../interfaces/IAuthResult'
 
 const TOKEN = Buffer.from(`${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`).toString('base64')
 
@@ -26,7 +26,7 @@ export default class Spotify {
     return token
   }
 
-  private static async getToken(): Promise<AuthResult> {
+  private static async getToken(): Promise<IAuthResult> {
     return new Promise((resolve, reject) => {
       const server = fastify()
 
