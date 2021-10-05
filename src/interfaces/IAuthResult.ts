@@ -1,4 +1,4 @@
-export default interface IAuthResult {
+export default interface AuthResult {
   access_token: string;
   token_type: string;
   expires_in: number;
