@@ -10,6 +10,10 @@ export default class Cache {
     nconf.save({})
   }
 
+  static tokenExpired() {
+    return Cache.get('generated_at') + (Cache.get('expires_in') * 1000) < Date.now()
+  }
+
   static get(key: string) {
     return nconf.get(key)
   }
