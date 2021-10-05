@@ -7,25 +7,12 @@ import IRefreshResult from '../interfaces/IRefreshResult'
 const TOKEN = Buffer.from([process.env.CLIENT_ID, process.env.CLIENT_SECRET].join(':')).toString('base64')
 
 export default class Spotify {
-  // static async retrieveLikedSongs(access_token: string) {
-  //   const tracks = []
-  //   const { data } = await axios.get('https://api.spotify.com/v1/me/tracks', {
-  //     headers: { 'Authorization': `Bearer ${access_token}` }
-  //   })
-
-  //   for (let i = 0; i <= Math.floor(data.total / 50); i++) {
-  //     const { data } = await axios.get(`https://api.spotify.com/v1/me/tracks?offset=${i * 50}&limit=50`,
-  //       { headers: { 'Authorization': `Bearer ${access_token}` } })
-
-  //     tracks.push(...data.items.map(track => track))
-  //   }
-  //   return tracks
-  // }
-
-  public static async getPlaylistSongs(access_token: string, playlist_id: string) {
+  public static async getPlaylist(access_token: string, playlist_id: string, acessors: Array<string | number>) {
     const result = await axios.get(`https://api.spotify.com/v1/playlists/${playlist_id}`, {
       headers: { 'Authorization': `Bearer ${access_token}` }
     })
+
+    if (acessors.length) return acessors.reduce((p, c) => p ? p[c] : result.data[c], null)
 
     return result?.data || {}
   }
