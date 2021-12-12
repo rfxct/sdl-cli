@@ -1,18 +1,26 @@
 import axios from 'axios'
 import fastify, { FastifyReply, FastifyRequest } from 'fastify'
 
-import IAuthResult from '../interfaces/IAuthResult'
-import IRefreshResult from '../interfaces/IRefreshResult'
+import IAuthResult from '../types/IAuthResult'
+import IPlaylist from '../types/spotify/playlist/IPlaylist'
+import IRefreshResult from '../types/IRefreshResult'
 
 const TOKEN = Buffer.from([process.env.CLIENT_ID, process.env.CLIENT_SECRET].join(':')).toString('base64')
 
 export default class Spotify {
-  public static async getPlaylist(access_token: string, playlist_id: string, acessors: Array<string | number>) {
+  public static async getPlaylist(
+    access_token: string,
+    playlist_id: string,
+    acessors: string | number | Array<string | number> | null = null
+  ): Promise<IPlaylist | null> {
     const result = await axios.get(`https://api.spotify.com/v1/playlists/${playlist_id}`, {
       headers: { 'Authorization': `Bearer ${access_token}` }
     })
 
-    if (acessors.length) return acessors.reduce((p, c) => p ? p[c] : result.data[c], null)
+    if (acessors) {
+      const _acessors = Array.isArray(acessors) ? acessors : [acessors]
+      return _acessors.reduce((p, c) => p ? p[c] : result.data[c], null)
+    }
 
     return result?.data || {}
   }
