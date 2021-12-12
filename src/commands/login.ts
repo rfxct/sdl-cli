@@ -4,7 +4,7 @@ import cli from 'cli-ux'
 import Spotify from '../wrappers/Spotify'
 import Cache from '../wrappers/Cache'
 
-import * as nconf from 'nconf'
+import nconf from 'nconf'
 nconf.file({ file: 'cache/auth.json' })
 
 export default class Login extends Command {

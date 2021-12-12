@@ -1,8 +1,8 @@
-import * as nconf from 'nconf'
+import nconf from 'nconf'
 nconf.file({ file: 'cache/auth.json' })
 
-import IAuthResult from '../interfaces/IAuthResult'
-import IRefreshResult from '../interfaces/IRefreshResult'
+import IAuthResult from '../types/IAuthResult'
+import IRefreshResult from '../types/IRefreshResult'
 
 export default class Cache {
   static persistAuth(data: IAuthResult | IRefreshResult) {
